@@ -4,3 +4,21 @@
   padding: 0;
   font-family:'Lato', 'Roboto','"Helvetica Neue"','Courier New', Courier, monospace;
 }
+
+.MuiToolbar-root, .MuiDrawer-paper{
+  background-image: url('/header.jpg');
+  background-size: cover;
+}
+
+.MuiContainer-root{
+  background-image: url('/background3.jpg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+body{
+  background-image: url('/background2.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+}

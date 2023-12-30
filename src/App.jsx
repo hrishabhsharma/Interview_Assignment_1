@@ -40,7 +40,6 @@ const defaultTheme = createTheme({
 
 function App() {
   const [allTasks, setAllTasks] = useState([])
-  const [completedTasks, setCompletedTasks] = useState([])
   const [isEditDialog, setIsEditDialog] = useState(false)
   const [isEditable, setIsEditable] = useState(null)
   const [isCompleted, setIsCompleted] = useState(false)
@@ -50,7 +49,6 @@ function App() {
     axios('https://jsonplaceholder.typicode.com/users/1/todos')
       .then((response) => {
         setAllTasks(response.data)
-        setCompletedTasks(response.data.filter((task) => task.completed))
       })
       .catch((err) => console.log(err))
   }, [])
@@ -59,13 +57,13 @@ function App() {
     setMobileOpen(!mobileOpen);
   };
 
-  const toggleCompletedTask = () => {
-    setIsCompleted(!isCompleted)
+  // const toggleCompletedTask = () => {
+  //   setIsCompleted(!isCompleted)
 
-    if (window.innerWidth <= '1300') {
-      handleDrawerToggle()
-    }
-  }
+  //   if (window.innerWidth <= '1300') {
+  //     handleDrawerToggle()
+  //   }
+  // }
 
   const handleAddTask = (event) => {
     event.preventDefault();
@@ -105,7 +103,6 @@ function App() {
       })
 
       setAllTasks(update)
-      setCompletedTasks(update)
 
       toggleEditDialogBox()
     }
@@ -115,7 +112,6 @@ function App() {
     const update = (state) => state.filter((item) => item.id !== todo.id)
 
     setAllTasks(update)
-    setCompletedTasks(update)
   }
 
   const handleCompleted = (todo) => {
@@ -125,15 +121,6 @@ function App() {
       }
       return task
     }))
-
-    const match = completedTasks.find((task) => task.id === todo.id)
-
-    if (match) {
-      setCompletedTasks((state) => state.filter((task) => task.id !== todo.id))
-    } else {
-      todo.completed = !todo.completed
-      setCompletedTasks((state) => [todo, ...state])
-    }
   }
 
   const renderTodo = (todo) => (
@@ -145,12 +132,13 @@ function App() {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '1em',
-        minHeight: '4em',
+        padding: '10px',
         bgcolor: todo.completed ? 'lightsteelblue' : '',
-
       }}
     >
+      <IconButton onClick={() => handleCompleted(todo)}>
+        <TaskAltIcon />
+      </IconButton>
       <Typography variant='h6'>
         {todo.title}
       </Typography>
@@ -161,9 +149,7 @@ function App() {
         <IconButton onClick={() => handleDelete(todo)}>
           <DeleteIcon />
         </IconButton>
-        <IconButton onClick={() => handleCompleted(todo)}>
-          <TaskAltIcon />
-        </IconButton>
+
       </ButtonGroup>
     </Paper>
   )
@@ -171,7 +157,7 @@ function App() {
   const renderAllPage = (
     <Container
       maxWidth="md"
-      sx={{ marginTop: '7em' }}
+      sx={{ marginTop: '7em', padding: '1em 0' }}
     >
       <Box
         component='form'
@@ -192,6 +178,9 @@ function App() {
           autoFocus
           fullWidth
           required
+          sx={{
+            bgcolor: 'white'
+          }}
         />
         <Button
           type='submit'
@@ -205,7 +194,15 @@ function App() {
         </Button>
       </Box>
       <Divider sx={{ marginTop: '2em' }} />
-      <Stack spacing={2} mt={3} width='90%' marginX='auto'>
+      <Stack
+        spacing={2}
+        sx={{
+          margin: '2em auto',
+          width: '90%',
+          maxHeight: '75vh',
+          overflow: 'auto'
+        }}
+      >
         {allTasks && allTasks.map(renderTodo)}
       </Stack>
     </Container>
@@ -214,10 +211,18 @@ function App() {
   const renderCompletedTask = (
     <Container
       maxWidth="md"
-      sx={{ marginTop: '7em' }}
+      sx={{ marginTop: '7em', padding: '1em 0' }}
     >
-      <Stack spacing={2} mt={3} width='90%' marginX='auto'>
-        {completedTasks && completedTasks.map(renderTodo)}
+      <Stack
+        spacing={2}
+        sx={{
+          margin: '2em auto',
+          width: '90%',
+          maxHeight: '75vh',
+          overflow: 'auto'
+        }}
+      >
+        {allTasks && allTasks.filter((task) => task.completed).map(renderTodo)}
       </Stack>
     </Container>
   )
@@ -225,7 +230,7 @@ function App() {
   return (
     <ThemeProvider theme={defaultTheme}>
       <CssBaseline />
-      <AppBar color='inherit' sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+      <AppBar color='transparent' sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Toolbar>
           <IconButton
             color="inherit"
@@ -253,10 +258,10 @@ function App() {
         }}
       >
         <Toolbar />
-        <Box mt={5} marginX={3}>
+        <Box mt={5} marginX={1}>
           <Stack spacing={1}>
-            <Button onClick={toggleCompletedTask} size='large'>All tasks</Button>
-            <Button onClick={toggleCompletedTask} size='large'>Completed Tasks</Button>
+            <Button onClick={() => setIsCompleted(false)} size='large'>All tasks</Button>
+            <Button onClick={() => setIsCompleted(true)} size='large'>Completed Tasks</Button>
           </Stack>
         </Box>
       </Drawer>
@@ -267,6 +272,12 @@ function App() {
         open={isEditDialog}
         onClose={toggleEditDialogBox}
         fullWidth
+        repositionOnUpdate={false}
+        sx={{
+          '.MuiPaper-root': {
+            padding: 1,
+          },
+        }}
       >
         <DialogTitle>Edit the Todo Task</DialogTitle>
         <DialogContent>
